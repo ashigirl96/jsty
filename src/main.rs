@@ -1,44 +1,42 @@
 use serde_json::Value;
+use std::collections::HashMap;
+use std::fmt::{Debug, Display, Formatter};
 use std::io;
-use std::io::Read;
+use std::io::{BufWriter, Read, Write};
+
+fn fmt(value: &Value) -> String {
+    let mut result = String::new();
+    match value {
+        Value::Null => result.push_str("null"),
+        Value::Bool(_) => result.push_str("boolean"),
+        Value::Number(_) => result.push_str("number"),
+        Value::String(_) => result.push_str("string"),
+        Value::Array(ref array) => {
+            if array.len() > 0 {
+                result.push_str(format!("{}[]", fmt(&array[0])).as_str())
+            }
+        }
+        Value::Object(ref v) => {
+            result.push_str("{");
+            for (key, value) in v {
+                result.push_str(format!("{}: {};", key, fmt(value)).as_str())
+            }
+            result.push_str("}");
+        }
+    };
+    result
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut json = String::new();
     io::stdin()
         .read_to_string(&mut json)
         .expect("Failed to read line.");
-    let mut result = String::from("");
-    let data: Value = serde_json::from_str(&json)?;
-    pretty_deeper(&mut result, &data, 1);
-    println!("{}", result);
+    let data = serde_json::from_str(&json)?;
+
+    let stdout = io::stdout();
+    let mut output = BufWriter::new(stdout.lock());
+    writeln!(output, "type Hello = {}", fmt(&data));
 
     Ok(())
-}
-
-fn pretty_deeper(result: &mut String, x: &Value, depth: usize) {
-    let small_space = " ".repeat((depth - 1) * 4);
-    let space = " ".repeat(depth * 4);
-    match x {
-        Value::Null => result.push_str("null"),
-        Value::Bool(_) => result.push_str("boolean"),
-        Value::Number(_) => result.push_str("number"),
-        Value::String(_) => result.push_str("string"),
-        Value::Array(array) => {
-            if array.len() > 0 {
-                pretty_deeper(result, &array[0], depth);
-            } else {
-                result.push_str("undefined");
-            }
-            result.push_str("[]");
-        }
-        Value::Object(values) => {
-            result.push_str("{\n");
-            for (key, value) in values {
-                result.push_str(&format!("{}{}: ", &space.clone(), key));
-                pretty_deeper(result, value, depth + 1);
-                result.push_str(",\n");
-            }
-            result.push_str(&format!("{}}}", small_space));
-        }
-    }
 }

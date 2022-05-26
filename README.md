@@ -3,7 +3,7 @@
 JSON to TypeScript type converter
 
 ```shell
-$ ./target/release/jsty <<EOF
+$ ./target/release/jsty Personal <<EOF
 {
   "name": "reon",
   "age": 25,
@@ -17,13 +17,10 @@ $ ./target/release/jsty <<EOF
   }
 }
 EOF
-{
-    address: {
-        city: string,
-        prefecture: string,
-    },
-    age: number,
-    jobs: string[],
-    name: string,
-} 
+interface Personal {
+  address: { city: string; prefecture: string };
+  age: number;
+  jobs: string[];
+  name: string;
+}
 ```

@@ -1,8 +1,8 @@
 use serde_json::Value;
 use std::collections::HashMap;
 use std::fmt::{Debug, Display, Formatter};
-use std::io;
 use std::io::{BufWriter, Read, Write};
+use std::{env, io};
 
 fn fmt(value: &Value) -> String {
     let mut result = String::new();
@@ -28,6 +28,12 @@ fn fmt(value: &Value) -> String {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let args: Vec<String> = env::args().collect();
+    let interface_name = if args.len() == 2 {
+        args[1].clone()
+    } else {
+        String::from("Hello")
+    };
     let mut json = String::new();
     io::stdin()
         .read_to_string(&mut json)
@@ -36,7 +42,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let stdout = io::stdout();
     let mut output = BufWriter::new(stdout.lock());
-    writeln!(output, "type Hello = {}", fmt(&data));
+    writeln!(output, "interface {} {}", interface_name, fmt(&data));
 
     Ok(())
 }

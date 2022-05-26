@@ -1,6 +1,4 @@
-mod lib;
-
-use jsty::fmt;
+use jsty::fmt_pretty;
 use serde_json::Value;
 use std::collections::HashMap;
 use std::fmt::{Debug, Display, Formatter};
@@ -22,7 +20,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let stdout = io::stdout();
     let mut output = BufWriter::new(stdout.lock());
-    writeln!(output, "interface {} {}", interface_name, fmt(&data));
+    writeln!(
+        output,
+        "interface {} {}",
+        interface_name,
+        fmt_pretty(&data, 1)
+    );
 
     Ok(())
 }
